@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nova Teleprompter</title>
+ <style>
+  body {
+    background-color: #000;
+    color: #f57c00; /* Quantum orange */
+    font-size: 2rem;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', monospace;
+    overflow: hidden;
+  }
+
+  #controls {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    z-index: 9999;
+    border-bottom: 1px solid #f57c00;
+  }
+
+  #controls button, #controls input[type="range"], #controls input[type="file"] {
+    margin: 0.25rem;
+    padding: 0.4rem 0.8rem;
+    background: #111;
+    color: #f57c00;
+    border: 1px solid #f57c00;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease-in-out;
+  }
+
+  #controls button:hover, #controls input[type="range"]:hover, #controls input[type="file"]:hover {
+    background: #f57c00;
+    color: #000;
+    cursor: pointer;
+  }
+
+  #text {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    white-space: pre-wrap;
+    transform: translateY(0);
+    padding: 2rem;
+  }
+
+  .mirrored {
+    transform: scaleX(-1);
+  }
+
+  #logo {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    opacity: 0.3;
+    height: 60px;
+    pointer-events: none;
+  }
+</style>
+
+</head>
+<body>
+  <div id="controls">
+    <button onclick="toggleScroll()">⏯ Pause/Play</button>
+    <label>Speed: <input type="range" id="speedControl" min="10" max="200" value="50"></label>
+    <label>Font Size: <input type="range" id="fontSize" min="16" max="100" value="32"></label>
+    <button onclick="toggleMirror()">🪞 Mirror</button>
+    <input type="file" id="fileInput" accept=".txt">
+
+  </div>
+
+  <div id="text">
+    This is your teleprompter script.\nEdit this text in index.html or load from file later.
+  </div>
+
+  <script>
+    const text = document.getElementById("text");
+    const speedInput = document.getElementById("speedControl");
+    const fontSizeInput = document.getElementById("fontSize");
+
+    let scrollSpeed = 50;
+    let isPaused = false;
+    let position = 0;
+
+    function scrollLoop() {
+      if (!isPaused) {
+        position -= scrollSpeed / 100;
+        text.style.transform = `translateY(${position}px)`;
+      }
+      requestAnimationFrame(scrollLoop);
+    }
+
+    // Load text file
+document.getElementById("fileInput").addEventListener("change", function () {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      text.textContent = e.target.result;
+      position = 0; // reset scroll
+    };
+    reader.readAsText(file);
+  }
+});
+
+
+    function toggleScroll() {
+      isPaused = !isPaused;
+    }
+
+    speedInput.addEventListener("input", () => {
+      scrollSpeed = Number(speedInput.value);
+    });
+
+    fontSizeInput.addEventListener("input", () => {
+      text.style.fontSize = fontSizeInput.value + "px";
+    });
+
+    function toggleMirror() {
+      text.classList.toggle("mirrored");
+    }
+
+    scrollLoop();
+  </script>
+</body>
+</html>
